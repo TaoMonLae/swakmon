@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: var(--font-body), 'Circular', -apple-system, system-ui, Roboto, 'Helvetica Neue', sans-serif;
+  }
+
+  /* Display headlines use the same variable font at modest weights (Airbnb Cereal style) */
+  .font-display {
+    font-family: var(--font-body), 'Circular', -apple-system, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+  }
+}
