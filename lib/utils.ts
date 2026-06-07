@@ -10,10 +10,10 @@ export function formatMMK(amount: number | null | undefined): string {
 
 /**
  * Generate a listing reference from a numeric ID.
- * 42 -> "TM-00042"
+ * 42 -> "SM-00042"
  */
 export function generateListingRef(id: number): string {
-  return `TM-${String(id).padStart(5, '0')}`
+  return `SM-${String(id).padStart(5, '0')}`
 }
 
 /**
@@ -98,7 +98,7 @@ export function generateRef(): string {
     .join('')
     .toUpperCase()
     .slice(0, 5)
-  return `TM-${ts}-${rand}`
+  return `SM-${ts}-${rand}`
 }
 
 /**

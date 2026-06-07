@@ -43,19 +43,19 @@ describe('formatMMK', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 describe('generateListingRef', () => {
   it('pads a single-digit id to 5 digits', () => {
-    expect(generateListingRef(1)).toBe('TM-00001')
+    expect(generateListingRef(1)).toBe('SM-00001')
   })
 
   it('pads a two-digit id correctly', () => {
-    expect(generateListingRef(42)).toBe('TM-00042')
+    expect(generateListingRef(42)).toBe('SM-00042')
   })
 
   it('formats a 5-digit id without extra padding', () => {
-    expect(generateListingRef(12345)).toBe('TM-12345')
+    expect(generateListingRef(12345)).toBe('SM-12345')
   })
 
-  it('always starts with "TM-"', () => {
-    expect(generateListingRef(7)).toMatch(/^TM-/)
+  it('always starts with "SM-"', () => {
+    expect(generateListingRef(7)).toMatch(/^SM-/)
   })
 })
 

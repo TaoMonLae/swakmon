@@ -4,6 +4,9 @@ import { HeroSearch } from '@/components/listings/HeroSearch'
 import { LatestListings } from '@/components/listings/LatestListings'
 import { Button } from '@/components/ui/Button'
 import type { ListingData } from '@/components/listings/ListingGrid'
+import { t, translateName } from '@/lib/i18n'
+import { getLocale } from '@/lib/i18n-server'
+import { readListingImages } from '@/lib/listingInput'
 
 const CATEGORY_TILES = [
   { slug: 'rent', name: 'Property Rent', icon: 'ti-home' },
@@ -43,6 +46,7 @@ async function getTotalListingCount() {
 }
 
 export default async function HomePage() {
+  const locale = getLocale()
   const [listings, categoryCounts, totalCount] = await Promise.all([
     getActiveListings(),
     getCategoryCounts(),
@@ -60,7 +64,7 @@ export default async function HomePage() {
     category: { name: l.category.name, slug: l.category.slug },
     state: { name: l.state.name, slug: l.state.slug },
     township: { name: l.township.name },
-    imageUrl: null,
+    imageUrl: readListingImages(l.images)[0]?.url ?? null,
   }))
 
   return (
@@ -69,10 +73,10 @@ export default async function HomePage() {
       <section className="bg-canvas py-16 text-center">
         <div className="mx-auto max-w-3xl px-4">
           <h1 className="font-display text-3xl font-bold text-ink sm:text-5xl">
-            Buy, sell and rent in Mon, Karen and Thanintharyi
+            {t('home.hero.title', locale)}
           </h1>
           <p className="mt-4 text-base text-muted">
-            Southern Myanmar&apos;s trusted classifieds platform
+            {t('home.hero.subtitle', locale)}
           </p>
           <HeroSearch />
         </div>
@@ -83,15 +87,15 @@ export default async function HomePage() {
         <div className="mx-auto flex max-w-3xl items-center justify-center divide-x divide-hairline px-4 py-5">
           <div className="px-6 text-center">
             <p className="text-xl font-bold text-rausch">{totalCount}</p>
-            <p className="text-xs text-muted">Listings</p>
+            <p className="text-xs text-muted">{t('home.stats.listings', locale)}</p>
           </div>
           <div className="px-6 text-center">
             <p className="text-xl font-bold text-rausch">3</p>
-            <p className="text-xs text-muted">States</p>
+            <p className="text-xs text-muted">{t('home.stats.states', locale)}</p>
           </div>
           <div className="px-6 text-center">
-            <p className="text-xl font-bold text-rausch">Free</p>
-            <p className="text-xs text-muted">to list</p>
+            <p className="text-xl font-bold text-rausch">{t('home.stats.free_value', locale)}</p>
+            <p className="text-xs text-muted">{t('home.stats.free', locale)}</p>
           </div>
         </div>
       </section>
@@ -101,6 +105,8 @@ export default async function HomePage() {
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {CATEGORY_TILES.map((tile) => {
             const catData = categoryCounts.find((c) => c.slug === tile.slug)
+            const count = catData?.count ?? 0
+            const listingsText = locale === 'my' ? 'ကြော်ငြာ' : (count === 1 ? 'listing' : 'listings')
             return (
               <Link
                 key={tile.slug}
@@ -108,9 +114,9 @@ export default async function HomePage() {
                 className="group flex flex-col items-center rounded-md border border-hairline bg-canvas p-6 text-center text-ink transition hover:shadow-float"
               >
                 <i className={`ti ${tile.icon} text-4xl text-rausch`} aria-hidden="true" />
-                <span className="mt-3 text-sm font-semibold">{tile.name}</span>
+                <span className="mt-3 text-sm font-semibold">{translateName(tile.name, locale)}</span>
                 <span className="mt-1 text-xs text-muted">
-                  {catData?.count ?? 0} listing{(catData?.count ?? 0) !== 1 ? 's' : ''}
+                  {count} {listingsText}
                 </span>
               </Link>
             )
@@ -125,15 +131,15 @@ export default async function HomePage() {
       <section className="border-t border-hairline bg-surface-soft py-14 text-center">
         <div className="mx-auto max-w-2xl px-4">
           <h2 className="font-display text-2xl font-bold text-ink">
-            Want to list your property or motorcycle?
+            {t('home.cta.title', locale)}
           </h2>
           <p className="mt-3 text-muted">
-            Contact our team and we&apos;ll post it for you – free for basic listings.
+            {t('home.cta.desc', locale)}
           </p>
           <div className="mt-6">
             <Link href="/post-ad">
               <Button variant="primary" size="lg">
-                Post Your Ad
+                {t('home.cta.button', locale)}
               </Button>
             </Link>
           </div>

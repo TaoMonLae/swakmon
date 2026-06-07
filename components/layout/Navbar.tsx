@@ -3,16 +3,25 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { t } from '@/lib/i18n'
+import { useLocale } from '@/components/LocaleProvider'
 
 const NAV_LINKS = [
-  { href: '/browse/rent', label: 'Rent' },
-  { href: '/browse/sale', label: 'Sale' },
-  { href: '/browse/land', label: 'Land' },
-  { href: '/browse/moto', label: 'Motorcycles' },
+  { href: '/browse/rent', labelKey: 'nav.rent' },
+  { href: '/browse/sale', labelKey: 'nav.sale' },
+  { href: '/browse/land', labelKey: 'nav.land' },
+  { href: '/browse/moto', labelKey: 'nav.motorcycles' },
 ]
 
 export function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const locale = useLocale()
+
+  const toggleLocale = () => {
+    const nextLocale = locale === 'my' ? 'en' : 'my'
+    document.cookie = `lang=${nextLocale}; path=/; max-age=31536000`
+    window.location.reload()
+  }
 
   return (
     <>
@@ -33,22 +42,32 @@ export function Navbar() {
                 href={link.href}
                 className="rounded-full px-4 py-2 text-base font-semibold text-ink transition hover:bg-surface-soft"
               >
-                {link.label}
+                {t(link.labelKey, locale)}
               </Link>
             ))}
           </nav>
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            {/* Language Switch */}
+            <button
+              onClick={toggleLocale}
+              className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-surface-soft"
+              title={locale === 'my' ? 'Switch to English' : 'မြန်မာဘာသာသို့ ပြောင်းရန်'}
+            >
+              <i className="ti ti-world text-sm" />
+              <span>{locale === 'my' ? 'English' : 'မြန်မာ'}</span>
+            </button>
+
             <Link
               href="/admin/login"
               className="hidden rounded-full px-4 py-2 text-sm font-semibold text-ink transition hover:bg-surface-soft sm:block"
             >
-              Sign in
+              {t('nav.signin', locale)}
             </Link>
             <Link href="/post-ad">
               <Button size="sm" variant="primary">
-                + Post Ad
+                + {t('nav.postad', locale)}
               </Button>
             </Link>
 
@@ -101,20 +120,30 @@ export function Navbar() {
                   onClick={() => setDrawerOpen(false)}
                   className="rounded-md px-3 py-2 text-base font-semibold text-ink hover:bg-surface-soft"
                 >
-                  {link.label}
+                  {t(link.labelKey, locale)}
                 </Link>
               ))}
               <hr className="my-3 border-hairline" />
+              <button
+                onClick={() => {
+                  setDrawerOpen(false)
+                  toggleLocale()
+                }}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-ink hover:bg-surface-soft"
+              >
+                <i className="ti ti-world text-base" />
+                <span>{locale === 'my' ? 'English' : 'မြန်မာဘာသာ'}</span>
+              </button>
               <Link
                 href="/admin/login"
                 onClick={() => setDrawerOpen(false)}
                 className="rounded-md px-3 py-2 text-sm text-muted hover:bg-surface-soft"
               >
-                Sign in
+                {t('nav.signin', locale)}
               </Link>
               <Link href="/post-ad" onClick={() => setDrawerOpen(false)}>
                 <Button size="sm" variant="primary" className="mt-2 w-full">
-                  + Post Ad
+                  + {t('nav.postad', locale)}
                 </Button>
               </Link>
             </nav>

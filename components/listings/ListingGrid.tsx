@@ -1,5 +1,9 @@
+'use client'
+
 import { ListingCard } from './ListingCard'
 import type { ListingTier } from '@prisma/client'
+import { t } from '@/lib/i18n'
+import { useLocale } from '@/components/LocaleProvider'
 
 export interface ListingData {
   id: number
@@ -19,12 +23,15 @@ interface ListingGridProps {
   emptyMessage?: string
 }
 
-export function ListingGrid({ listings, emptyMessage = 'No listings found.' }: ListingGridProps) {
+export function ListingGrid({ listings, emptyMessage }: ListingGridProps) {
+  const locale = useLocale()
+  const displayEmpty = emptyMessage || t('browse.filters.no_results', locale)
+
   if (listings.length === 0) {
     return (
       <div className="py-20 text-center text-gray-400">
         <i className="ti ti-folder-open text-5xl" aria-hidden="true" />
-        <p className="mt-2">{emptyMessage}</p>
+        <p className="mt-2">{displayEmpty}</p>
       </div>
     )
   }
@@ -45,6 +52,7 @@ export function ListingGrid({ listings, emptyMessage = 'No listings found.' }: L
           townshipName={l.township.name}
           imageUrl={l.imageUrl}
           createdAt={l.createdAt}
+          locale={locale}
         />
       ))}
     </div>

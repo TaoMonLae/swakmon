@@ -8,9 +8,11 @@ import { ImageGallery } from '@/components/listings/ImageGallery'
 
 import { ListingGrid } from '@/components/listings/ListingGrid'
 import { ViewTracker } from '@/components/listings/ViewTracker'
-import { formatMMK, timeAgo, truncate } from '@/lib/utils'
+import { truncate } from '@/lib/utils'
 import { readListingImages } from '@/lib/listingInput'
 import type { Metadata } from 'next'
+import { t, translateName, formatPrice, translateTimeAgo } from '@/lib/i18n'
+import { getLocale } from '@/lib/i18n-server'
 
 interface PageProps { params: { id: string } }
 
@@ -40,6 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ListingPage({ params }: PageProps) {
+  const locale = getLocale()
   const id = Number(params.id)
   if (isNaN(id)) notFound()
 
@@ -107,11 +110,11 @@ export default async function ListingPage({ params }: PageProps) {
         {/* Breadcrumb */}
         <nav className="mb-5 text-sm text-gray-500" aria-label="Breadcrumb">
           <ol className="flex items-center gap-1.5">
-            <li><Link href="/" className="hover:text-brand-green">Home</Link></li>
+            <li><Link href="/" className="hover:text-brand-green">{t('browse.breadcrumb.home', locale)}</Link></li>
             <li><span className="mx-1">›</span></li>
-            <li><Link href={`/browse/${listing.category.slug}`} className="hover:text-brand-green">{listing.category.name}</Link></li>
+            <li><Link href={`/browse/${listing.category.slug}`} className="hover:text-brand-green">{translateName(listing.category.name, locale)}</Link></li>
             <li><span className="mx-1">›</span></li>
-            <li><Link href={`/browse/${listing.category.slug}?state=${listing.state.slug}`} className="hover:text-brand-green">{listing.state.name}</Link></li>
+            <li><Link href={`/browse/${listing.category.slug}?state=${listing.state.slug}`} className="hover:text-brand-green">{translateName(listing.state.name, locale)}</Link></li>
             <li><span className="mx-1">›</span></li>
             <li className="truncate text-gray-700">{truncate(listing.title, 40)}</li>
           </ol>
@@ -128,7 +131,7 @@ export default async function ListingPage({ params }: PageProps) {
             <div className="mt-6">
               {/* Price */}
               <p className="text-2xl font-bold text-brand-green">
-                {listing.priceLabel ?? `MMK ${formatMMK(listing.price)}`}
+                {formatPrice(listing.price, locale, listing.priceLabel)}
               </p>
 
               {/* Title */}
@@ -139,11 +142,11 @@ export default async function ListingPage({ params }: PageProps) {
               {/* Badges */}
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge variant={listing.category.slug as 'rent' | 'sale' | 'land' | 'moto'}>
-                  {listing.category.name}
+                  {translateName(listing.category.name, locale)}
                 </Badge>
                 {(listing.tier === 'FEATURED' || listing.tier === 'PREMIUM') && (
                   <Badge variant={listing.tier === 'PREMIUM' ? 'premium' : 'featured'}>
-                    {listing.tier === 'PREMIUM' ? 'Premium' : 'Featured'}
+                    {translateName(listing.tier === 'PREMIUM' ? 'Premium' : 'Featured', locale)}
                   </Badge>
                 )}
               </div>
@@ -151,18 +154,18 @@ export default async function ListingPage({ params }: PageProps) {
               {/* Location */}
               <p className="mt-4 flex items-center gap-1.5 text-sm text-gray-600">
                 <i className="ti ti-map-pin text-base" aria-hidden="true" />
-                {listing.township.name}, {listing.state.name}
+                {translateName(listing.township.name, locale)}, {translateName(listing.state.name, locale)}
               </p>
 
               {/* Meta row */}
               <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-400">
                 <span className="flex items-center gap-1">
                   <i className="ti ti-clock" aria-hidden="true" />
-                  {timeAgo(listing.createdAt)}
+                  {translateTimeAgo(listing.createdAt, locale)}
                 </span>
                 <span className="flex items-center gap-1">
                   <i className="ti ti-eye" aria-hidden="true" />
-                  {listing.viewCount} views
+                  {listing.viewCount} {t('detail.views', locale)}
                 </span>
                 <span className="flex items-center gap-1">
                   <i className="ti ti-tag" aria-hidden="true" />
@@ -174,7 +177,7 @@ export default async function ListingPage({ params }: PageProps) {
               <hr className="my-6 border-gray-100" />
 
               {/* Description */}
-              <h2 className="mb-3 text-lg font-semibold text-gray-900">About this listing</h2>
+              <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('detail.about', locale)}</h2>
               <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
                 {listing.description}
               </div>
@@ -186,10 +189,10 @@ export default async function ListingPage({ params }: PageProps) {
             {/* Contact card */}
             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
               <p className="mb-1 text-base font-semibold text-gray-900">
-                Interested in this listing?
+                {t('detail.interest', locale)}
               </p>
               <p className="mb-4 text-xs text-gray-400">
-                Posted {timeAgo(listing.createdAt)}
+                {t('detail.posted', locale)} {translateTimeAgo(listing.createdAt, locale)}
               </p>
 
               <div className="space-y-2.5">
@@ -228,22 +231,22 @@ export default async function ListingPage({ params }: PageProps) {
               </div>
 
               <p className="mt-4 text-center text-xs text-gray-400">
-                Contact is managed by the Swak Mon သွက်မန် team
+                {t('detail.contact_managed', locale)}
               </p>
             </div>
 
             {/* Listed by card */}
             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="mb-3 text-sm font-semibold text-gray-900">Listed by</p>
+              <p className="mb-3 text-sm font-semibold text-gray-900">{t('detail.listed_by', locale)}</p>
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-green text-sm font-bold text-brand-cream">
                   D
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Swak Mon သွက်မန် Admin</p>
+                  <p className="text-sm font-medium text-gray-900">{t('detail.admin', locale)}</p>
                   <p className="flex items-center gap-1 text-xs text-gray-500">
                     <i className="ti ti-shield-check text-green-600" aria-hidden="true" />
-                    Verified listing
+                    {t('detail.verified', locale)}
                   </p>
                 </div>
               </div>
@@ -254,7 +257,7 @@ export default async function ListingPage({ params }: PageProps) {
         {/* Similar listings */}
         {similar.length > 0 && (
           <section className="mt-12 border-t border-gray-100 pt-10">
-            <h2 className="mb-5 text-xl font-bold text-gray-900">Similar listings</h2>
+            <h2 className="mb-5 text-xl font-bold text-gray-900">{t('detail.similar', locale)}</h2>
             <ListingGrid
               listings={similar.map((l) => ({
                 id: l.id,

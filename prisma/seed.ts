@@ -112,10 +112,10 @@ async function main() {
 
   const listings: ListingUpsertData[] = [
     {
-      where: { listingRef: 'TM-00001' },
+      where: { listingRef: 'SM-00001' },
       update: {},
       create: {
-        listingRef: 'TM-00001',
+        listingRef: 'SM-00001',
         title: '2-Bedroom House near Kyaikthanlan Pagoda',
         description: [
           'Comfortable 2-bedroom house located just a 5-minute walk from the iconic Kyaikthanlan Pagoda in central Mawlamyine.',
@@ -140,10 +140,10 @@ async function main() {
     },
 
     {
-      where: { listingRef: 'TM-00002' },
+      where: { listingRef: 'SM-00002' },
       update: {},
       create: {
-        listingRef: 'TM-00002',
+        listingRef: 'SM-00002',
         title: 'Flat Land 2 Acres — Hpa-An Town',
         description: [
           'Two acres of level, cleared land situated on the outskirts of Hpa-An Town with direct road frontage.',
@@ -168,10 +168,10 @@ async function main() {
     },
 
     {
-      where: { listingRef: 'TM-00003' },
+      where: { listingRef: 'SM-00003' },
       update: {},
       create: {
-        listingRef: 'TM-00003',
+        listingRef: 'SM-00003',
         title: 'Honda Wave 125i 2022 — Like New',
         description: [
           '2022 model Honda Wave 125i in excellent condition with only 8,000 km on the odometer.',
@@ -196,10 +196,10 @@ async function main() {
     },
 
     {
-      where: { listingRef: 'TM-00004' },
+      where: { listingRef: 'SM-00004' },
       update: {},
       create: {
-        listingRef: 'TM-00004',
+        listingRef: 'SM-00004',
         title: '2-Storey Shophouse for Sale, Dawei Town',
         description: [
           'Prime 2-storey shophouse in the heart of Dawei Town on a high-footfall commercial street.',
@@ -224,10 +224,10 @@ async function main() {
     },
 
     {
-      where: { listingRef: 'TM-00005' },
+      where: { listingRef: 'SM-00005' },
       update: {},
       create: {
-        listingRef: 'TM-00005',
+        listingRef: 'SM-00005',
         title: '3-Acre Agricultural Land on Myawaddy Road',
         description: [
           'Three acres of fertile agricultural land with direct access to the Myawaddy–Kawkareik main road in Karen State.',
@@ -258,7 +258,7 @@ async function main() {
   for (const data of listings) {
     await prisma.listing.upsert(data)
   }
-  console.log('  ✓ Sample listings (TM-00001 → TM-00005)')
+  console.log('  ✓ Sample listings (SM-00001 → SM-00005)')
 
   console.log('\n✅ Seed complete.')
   if (process.env.NODE_ENV !== 'production') {

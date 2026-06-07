@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { getContactUrl } from '@/lib/utils'
+import { t, translateName } from '@/lib/i18n'
+import { getLocale } from '@/lib/i18n-server'
 
 const CATEGORIES = [
-  { href: '/browse/rent', label: 'Rent' },
-  { href: '/browse/sale', label: 'Sale' },
-  { href: '/browse/land', label: 'Land' },
+  { href: '/browse/rent', label: 'Property Rent' },
+  { href: '/browse/sale', label: 'Property Sale' },
+  { href: '/browse/land', label: 'Land Sale' },
   { href: '/browse/moto', label: 'Motorcycles' },
 ]
 
@@ -15,6 +17,7 @@ const STATES = [
 ]
 
 export function Footer() {
+  const locale = getLocale()
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+95XXXXXXXXXX'
   const viber = process.env.NEXT_PUBLIC_VIBER_NUMBER ?? '+95XXXXXXXXXX'
   const facebook = process.env.NEXT_PUBLIC_FACEBOOK_URL ?? 'https://facebook.com/swakmonmm'
@@ -30,20 +33,20 @@ export function Footer() {
               Swak Mon သွက်မန်
             </p>
             <p className="mt-2 text-sm text-muted">
-              Southern Myanmar Marketplace
+              {t('footer.description', locale)}
             </p>
           </div>
 
           {/* Categories */}
           <div>
             <p className="mb-3 text-sm font-semibold text-ink">
-              Categories
+              {t('footer.categories', locale)}
             </p>
             <ul className="space-y-2 text-sm">
               {CATEGORIES.map((cat) => (
                 <li key={cat.href}>
                   <Link href={cat.href} className="text-muted transition hover:text-ink hover:underline">
-                    {cat.label}
+                    {translateName(cat.label, locale)}
                   </Link>
                 </li>
               ))}
@@ -53,13 +56,13 @@ export function Footer() {
           {/* States */}
           <div>
             <p className="mb-3 text-sm font-semibold text-ink">
-              States
+              {t('footer.states', locale)}
             </p>
             <ul className="space-y-2 text-sm">
               {STATES.map((state) => (
                 <li key={state.href}>
                   <Link href={state.href} className="text-muted transition hover:text-ink hover:underline">
-                    {state.label}
+                    {translateName(state.label, locale)}
                   </Link>
                 </li>
               ))}
@@ -69,7 +72,7 @@ export function Footer() {
           {/* Contact */}
           <div>
             <p className="mb-3 text-sm font-semibold text-ink">
-              Contact
+              {t('footer.contact', locale)}
             </p>
             <ul className="space-y-2 text-sm">
               <li>
@@ -114,7 +117,7 @@ export function Footer() {
 
         {/* Legal band */}
         <p className="mt-10 border-t border-hairline pt-6 text-center text-xs text-muted">
-          © 2025 Swak Mon သွက်မန်. Mon, Karen and Thanintharyi.
+          {t('footer.copyright', locale)}
         </p>
       </div>
     </footer>

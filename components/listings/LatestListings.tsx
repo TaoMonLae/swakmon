@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ListingGrid, type ListingData } from './ListingGrid'
 import { cn } from '@/lib/cn'
+import { t, translateName } from '@/lib/i18n'
+import { useLocale } from '@/components/LocaleProvider'
 
 const STATE_TABS = [
     { slug: 'all', label: 'All' },
@@ -18,6 +20,7 @@ interface LatestListingsProps {
 
 export function LatestListings({ listings }: LatestListingsProps) {
     const [activeTab, setActiveTab] = useState('all')
+    const locale = useLocale()
 
     const filtered =
         activeTab === 'all'
@@ -28,12 +31,12 @@ export function LatestListings({ listings }: LatestListingsProps) {
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Latest listings</h2>
+                <h2 className="text-xl font-bold text-gray-900">{t('home.latest.title', locale)}</h2>
                 <Link
                     href="/browse/all"
                     className="text-sm font-medium text-brand-green hover:underline"
                 >
-                    View all →
+                    {t('home.latest.view_all', locale)}
                 </Link>
             </div>
 
@@ -51,7 +54,7 @@ export function LatestListings({ listings }: LatestListingsProps) {
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         )}
                     >
-                        {tab.label}
+                        {translateName(tab.label, locale)}
                     </button>
                 ))}
             </div>
@@ -59,7 +62,7 @@ export function LatestListings({ listings }: LatestListingsProps) {
             {/* Grid */}
             <ListingGrid
                 listings={filtered.slice(0, 6)}
-                emptyMessage="No listings in this state yet."
+                emptyMessage={t('home.latest.empty', locale)}
             />
         </section>
     )

@@ -1,7 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
-import { formatMMK, timeAgo } from '@/lib/utils'
+import { translateName, formatPrice, translateTimeAgo } from '@/lib/i18n'
+import type { Locale } from '@/lib/i18n'
 import type { ListingTier } from '@prisma/client'
 
 export interface ListingCardProps {
@@ -16,6 +17,7 @@ export interface ListingCardProps {
   categoryName: string
   imageUrl?: string | null
   createdAt: Date | string
+  locale: Locale
 }
 
 export function ListingCard({
@@ -30,6 +32,7 @@ export function ListingCard({
   categoryName,
   imageUrl,
   createdAt,
+  locale,
 }: ListingCardProps) {
   const isFeatured = tier === 'FEATURED' || tier === 'PREMIUM'
   const createdDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt
@@ -59,7 +62,7 @@ export function ListingCard({
           {/* Category badge - top left */}
           <span className="absolute left-2 top-2">
             <Badge variant={categorySlug as 'rent' | 'sale' | 'land' | 'moto'}>
-              {categoryName}
+              {translateName(categoryName, locale)}
             </Badge>
           </span>
 
@@ -67,7 +70,7 @@ export function ListingCard({
           {isFeatured && (
             <span className="absolute right-2 top-2">
               <Badge variant={tier === 'PREMIUM' ? 'premium' : 'featured'}>
-                {tier === 'PREMIUM' ? 'Premium' : 'Featured'}
+                {translateName(tier === 'PREMIUM' ? 'Premium' : 'Featured', locale)}
               </Badge>
             </span>
           )}
@@ -76,16 +79,16 @@ export function ListingCard({
         {/* Body */}
         <div className="p-3">
           <p className="text-base font-bold text-brand-green">
-            {priceLabel ?? formatMMK(price)}
+            {formatPrice(price, locale, priceLabel)}
           </p>
           <h3 className="mt-1 text-sm font-medium leading-snug text-gray-900 line-clamp-2 group-hover:text-brand-green transition">
             {title}
           </h3>
           <p className="mt-1.5 text-xs text-gray-500">
-            {townshipName}, {stateName}
+            {translateName(townshipName, locale)}, {translateName(stateName, locale)}
           </p>
           <p className="mt-0.5 text-xs text-gray-400">
-            {timeAgo(createdDate)}
+            {translateTimeAgo(createdDate, locale)}
           </p>
         </div>
       </div>

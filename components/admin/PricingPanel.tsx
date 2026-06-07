@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/cn'
 import { formatMMK } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
@@ -54,9 +54,13 @@ export function PricingPanel({ initialTier, initialData, tierPrices, onChange }:
   const finalPrice = Math.round(basePrice * (1 - discount / 100))
   const savings = basePrice - finalPrice
 
+  // Keep latest onChange in a ref to avoid stale-closure issues
+  const onChangeRef = useRef(onChange)
+  useEffect(() => { onChangeRef.current = onChange }, [onChange])
+
   // Emit changes
   useEffect(() => {
-    onChange({
+    onChangeRef.current({
       tier,
       overridePrice: overrideEnabled ? overridePrice : null,
       discountPct: discountEnabled ? discountPct : 0,

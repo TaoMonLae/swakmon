@@ -1,9 +1,17 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
+import { getLocale } from '@/lib/i18n-server'
+import { LocaleProvider } from '@/components/LocaleProvider'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
 
+const pyidaungsu = localFont({
+  src: './fonts/pyidaungsu.ttf',
+  variable: '--font-pyidaungsu',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Swak Mon သွက်မန် — Classifieds for Mon, Karen & Thanintharyi',
@@ -16,15 +24,20 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = getLocale()
   return (
-    <html lang="my" className={inter.variable}>
+    <html lang={locale} className={`${inter.variable} ${pyidaungsu.variable}`}>
       <head>
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/tabler-icons.min.css"
         />
       </head>
-      <body className="font-body bg-canvas text-ink antialiased">{children}</body>
+      <body className="font-body bg-canvas text-ink antialiased">
+        <LocaleProvider locale={locale}>
+          {children}
+        </LocaleProvider>
+      </body>
     </html>
   )
 }

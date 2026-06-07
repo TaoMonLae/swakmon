@@ -6,6 +6,8 @@ import { BrowseFilters } from '@/components/listings/BrowseFilters'
 import { Button } from '@/components/ui/Button'
 import { readListingImages } from '@/lib/listingInput'
 import type { Metadata } from 'next'
+import { t, translateName, Locale } from '@/lib/i18n'
+import { getLocale } from '@/lib/i18n-server'
 
 interface PageProps {
   params: { category: string }
@@ -27,11 +29,12 @@ const getCategoryBySlug = cache((slug: string) =>
 )
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const locale = getLocale()
   if (params.category === 'all') {
-    return { title: 'All Listings | Swak Mon သွက်မန်' }
+    return { title: `${translateName('All Listings', locale)} | Swak Mon သွက်မန်` }
   }
   const category = await getCategoryBySlug(params.category)
-  return { title: category ? `${category.name} | Swak Mon သွက်မန်` : 'Listings | Swak Mon သွက်မန်' }
+  return { title: category ? `${translateName(category.name, locale)} | Swak Mon သွက်မန်` : `Listings | Swak Mon သွက်မန်` }
 }
 
 function getOrderBy(sort: string) {
@@ -45,6 +48,7 @@ function getOrderBy(sort: string) {
 }
 
 export default async function BrowsePage({ params, searchParams }: PageProps) {
+  const locale = getLocale()
   const LIMIT = 12
   const categorySlug = params.category
   const q = searchParams.q ?? ''
@@ -67,8 +71,8 @@ export default async function BrowsePage({ params, searchParams }: PageProps) {
   if (townshipName) where.township = { name: townshipName }
   // Guard against NaN/Infinity from ?minPrice=abc or ?minPrice=Infinity.
   // Without this, Prisma throws a runtime error (P2023) → unhandled 500.
-  const minPriceNum = Number(minPrice)
-  const maxPriceNum = Number(maxPrice)
+  const minPriceNum = minPrice ? Number(minPrice) : NaN
+  const maxPriceNum = maxPrice ? Number(maxPrice) : NaN
   if (Number.isFinite(minPriceNum) || Number.isFinite(maxPriceNum)) {
     where.price = {
       ...(Number.isFinite(minPriceNum) && { gte: minPriceNum }),
@@ -135,29 +139,48 @@ export default async function BrowsePage({ params, searchParams }: PageProps) {
 
   // Breadcrumb
   const selectedState = stateSlug ? allStates.find((s) => s.slug === stateSlug) : null
-  const heading = category
-    ? selectedState ? `${category.name} in ${selectedState.name}` : category.name
-    : selectedState ? `All listings in ${selectedState.name}` : 'All listings'
+  
+  let heading = ''
+  if (category) {
+    const catName = translateName(category.name, locale)
+    if (selectedState) {
+      const stateName = translateName(selectedState.name, locale)
+      heading = locale === 'my' ? `${stateName} ရှိ ${catName}` : `${catName} in ${stateName}`
+    } else {
+      heading = catName
+    }
+  } else {
+    if (selectedState) {
+      const stateName = translateName(selectedState.name, locale)
+      heading = locale === 'my' ? `${stateName} ရှိ ကြော်ငြာအားလုံး` : `All listings in ${stateName}`
+    } else {
+      heading = translateName('All listings', locale)
+    }
+  }
+
+  const foundText = locale === 'my'
+    ? `${total} ခု တွေ့ရှိသည်`
+    : `${total} ${total !== 1 ? 'listings' : 'listing'} found`
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       {/* Breadcrumb */}
       <nav className="mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
         <ol className="flex items-center gap-1.5">
-          <li><Link href="/" className="hover:text-brand-green">Home</Link></li>
+          <li><Link href="/" className="hover:text-brand-green">{t('browse.breadcrumb.home', locale)}</Link></li>
           <li><span className="mx-1">›</span></li>
           {category ? (
             <>
-              <li><Link href={`/browse/${category.slug}`} className="hover:text-brand-green">{category.name}</Link></li>
+              <li><Link href={`/browse/${category.slug}`} className="hover:text-brand-green">{translateName(category.name, locale)}</Link></li>
               {selectedState && (
                 <>
                   <li><span className="mx-1">›</span></li>
-                  <li className="text-gray-700">{selectedState.name}</li>
+                  <li className="text-gray-700">{translateName(selectedState.name, locale)}</li>
                 </>
               )}
             </>
           ) : (
-            <li className="text-gray-700">All listings</li>
+            <li className="text-gray-700">{translateName('All listings', locale)}</li>
           )}
         </ol>
       </nav>
@@ -165,7 +188,7 @@ export default async function BrowsePage({ params, searchParams }: PageProps) {
       {/* Heading + count */}
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold text-brand-green">{heading}</h1>
-        <p className="mt-1 text-sm text-gray-500">{total} listing{total !== 1 ? 's' : ''} found</p>
+        <p className="mt-1 text-sm text-gray-500">{foundText}</p>
       </div>
 
       {/* Layout: sidebar + content */}
@@ -210,16 +233,17 @@ export default async function BrowsePage({ params, searchParams }: PageProps) {
                   totalPages={totalPages}
                   searchParams={searchParams}
                   basePath={`/browse/${categorySlug}`}
+                  locale={locale}
                 />
               )}
             </>
           ) : (
             <div className="flex flex-col items-center py-20 text-center">
               <i className="ti ti-search-off text-5xl text-gray-300" aria-hidden="true" />
-              <p className="mt-4 text-lg font-medium text-gray-600">No listings match your filters</p>
-              <p className="mt-1 text-sm text-gray-400">Try adjusting your search or filters</p>
+              <p className="mt-4 text-lg font-medium text-gray-600">{t('browse.filters.no_results', locale)}</p>
+              <p className="mt-1 text-sm text-gray-400">{t('browse.filters.try_adjusting', locale)}</p>
               <Link href="/browse/all" className="mt-4">
-                <Button variant="ghost" size="sm">Clear Filters</Button>
+                <Button variant="ghost" size="sm">{t('browse.filters.clear', locale)}</Button>
               </Link>
             </div>
           )}
@@ -235,11 +259,13 @@ function Pagination({
   totalPages,
   searchParams,
   basePath,
+  locale,
 }: {
   currentPage: number
   totalPages: number
   searchParams: Record<string, string | undefined>
   basePath: string
+  locale: Locale
 }) {
   function buildHref(page: number) {
     const params = new URLSearchParams()
@@ -271,7 +297,7 @@ function Pagination({
           href={buildHref(currentPage - 1)}
           className="inline-flex h-9 items-center rounded-lg border border-gray-300 px-3 text-sm text-gray-600 hover:bg-gray-50"
         >
-          Previous
+          {t('browse.pagination.prev', locale)}
         </a>
       )}
       {getPageNumbers().map((p, i) =>
@@ -295,7 +321,7 @@ function Pagination({
           href={buildHref(currentPage + 1)}
           className="inline-flex h-9 items-center rounded-lg border border-gray-300 px-3 text-sm text-gray-600 hover:bg-gray-50"
         >
-          Next
+          {t('browse.pagination.next', locale)}
         </a>
       )}
     </nav>

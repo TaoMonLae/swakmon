@@ -6,7 +6,7 @@ import { ListingCard } from '@/components/listings/ListingCard'
 
 // next/image → plain <img> (avoids loader/domain checks in jsdom)
 vi.mock('next/image', () => ({
-  default: ({ src, alt, ...rest }: { src: string; alt: string }) => (
+  default: ({ src, alt, fill, ...rest }: { src: string; alt: string; fill?: boolean; [key: string]: unknown }) => (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} {...rest} />
   ),
@@ -32,6 +32,7 @@ const BASE_PROPS = {
   categorySlug: 'rent',
   categoryName: 'Property Rent',
   createdAt: new Date('2025-05-25T12:00:00Z'),
+  locale: 'en' as const,
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -55,12 +56,12 @@ describe('ListingCard', () => {
 
   it('renders the priceLabel when supplied', () => {
     render(<ListingCard {...BASE_PROPS} />)
-    expect(screen.getByText('350,000/mo')).toBeInTheDocument()
+    expect(screen.getByText('350,000/mo MMK')).toBeInTheDocument()
   })
 
   it('falls back to formatted price when no priceLabel', () => {
     render(<ListingCard {...BASE_PROPS} priceLabel={null} price={350_000} />)
-    expect(screen.getByText('350,000')).toBeInTheDocument()
+    expect(screen.getByText('MMK 350,000')).toBeInTheDocument()
   })
 
   it('shows "POA" when price and priceLabel are both null', () => {

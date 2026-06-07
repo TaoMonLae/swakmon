@@ -2,22 +2,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { Badge } from '@/components/ui/Badge'
+import { t, translateName, Locale } from '@/lib/i18n'
+import { getLocale as getServerLocale } from '@/lib/i18n-server'
 
 export const metadata: Metadata = { title: 'Post Your Ad | Swak Mon သွက်မန်' }
 
 const STEPS = [
-  { n: '1', title: 'Contact us', desc: 'via WhatsApp, Viber or Facebook' },
-  { n: '2', title: 'We review', desc: 'Team checks your info and photos' },
-  { n: '3', title: 'Goes live', desc: 'Within 24 hours of receiving complete details' },
-]
-
-const CHECKLIST = [
-  'Category (Property Rent / Sale / Land Sale / Motorcycles)',
-  'State and Township',
-  'Asking price (in MMK)',
-  'Description – 3 to 5 sentences',
-  'At least 3 photos (landscape preferred)',
-  'Your contact phone number',
+  { n: '1', titleKey: 'post.step1.title', descKey: 'post.step1.desc' },
+  { n: '2', titleKey: 'post.step2.title', descKey: 'post.step2.desc' },
+  { n: '3', titleKey: 'post.step3.title', descKey: 'post.step3.desc' },
 ]
 
 interface TierConfig {
@@ -40,12 +33,17 @@ const TIER_FEATURES: Record<string, string[]> = {
   PREMIUM:  ['Homepage spotlight', 'All categories top', 'Up to 20 photos', 'Social media share'],
 }
 
-function formatPrice(tier: TierConfig): string {
-  if (tier.tier === 'BASIC' || tier.basePrice === 0) return 'Free'
-  return `${tier.basePrice.toLocaleString()} MMK/${tier.unit.replace('per ', '')}`
+function formatPrice(tier: TierConfig, locale: Locale): string {
+  if (tier.tier === 'BASIC' || tier.basePrice === 0) return t('post.tiers.free', locale)
+  const basePriceFormatted = tier.basePrice.toLocaleString()
+  return locale === 'my'
+    ? `${basePriceFormatted} ကျပ် / ${t('post.tiers.per_week', locale)}`
+    : `${basePriceFormatted} MMK/${tier.unit.replace('per ', '')}`
 }
 
 export default async function PostAdPage() {
+  const locale = getServerLocale()
+
   // Load persisted pricing config (falls back to defaults if not yet saved).
   const config = await prisma.pricingConfig
     .findUnique({ where: { id: 'global' } })
@@ -66,22 +64,31 @@ export default async function PostAdPage() {
   const phone     = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? '+95XXXXXXXXXX'
   const email     = process.env.NEXT_PUBLIC_EMAIL ?? 'ads@swakmon.com.mm'
 
+  const checklistItems = [
+    t('post.checklist.item1', locale),
+    t('post.checklist.item2', locale),
+    t('post.checklist.item3', locale),
+    t('post.checklist.item4', locale),
+    t('post.checklist.item5', locale),
+    t('post.checklist.item6', locale),
+  ]
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       {/* 1. BREADCRUMB + HEADER */}
       <nav className="mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
         <ol className="flex items-center gap-1.5">
-          <li><Link href="/" className="hover:text-brand-green">Home</Link></li>
+          <li><Link href="/" className="hover:text-brand-green">{t('browse.breadcrumb.home', locale)}</Link></li>
           <li><span className="mx-1">›</span></li>
-          <li className="text-gray-700">Post Your Ad</li>
+          <li className="text-gray-700">{t('nav.postad', locale)}</li>
         </ol>
       </nav>
 
       <h1 className="font-display text-3xl font-bold text-brand-green">
-        Post Your Ad on Swak Mon သွက်မန်
+        {t('post.title', locale)}
       </h1>
       <p className="mt-2 text-gray-600">
-        Our team creates your listing – just send us the details. Basic listings are free.
+        {t('post.desc', locale)}
       </p>
 
       {/* 2. HOW IT WORKS */}
@@ -91,8 +98,8 @@ export default async function PostAdPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-green text-sm font-bold text-white">
               {step.n}
             </div>
-            <p className="mt-3 text-sm font-bold text-gray-900">{step.title}</p>
-            <p className="mt-1 text-xs text-gray-500">{step.desc}</p>
+            <p className="mt-3 text-sm font-bold text-gray-900">{t(step.titleKey, locale)}</p>
+            <p className="mt-1 text-xs text-gray-500">{t(step.descKey, locale)}</p>
             {i < STEPS.length - 1 && (
               <div className="absolute right-0 top-5 hidden -translate-y-1/2 translate-x-1/2 text-gray-300 sm:block">
                 <i className="ti ti-arrow-right text-xl" aria-hidden="true" />
@@ -106,7 +113,7 @@ export default async function PostAdPage() {
       <div className="mt-12 grid gap-8 lg:grid-cols-[3fr_2fr]">
         {/* LEFT – Contact methods */}
         <div>
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Contact our team</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('post.team.title', locale)}</h2>
 
           {/* WhatsApp - primary card */}
           <a
@@ -121,7 +128,7 @@ export default async function PostAdPage() {
               <p className="text-sm text-gray-500">{waNumber}</p>
             </div>
             <span className="absolute right-3 top-3">
-              <Badge variant="featured">Recommended</Badge>
+              <Badge variant="featured">{t('post.team.recommended', locale)}</Badge>
             </span>
           </a>
 
@@ -145,7 +152,7 @@ export default async function PostAdPage() {
             >
               <i className="ti ti-brand-facebook text-2xl text-blue-600" aria-hidden="true" />
               <div>
-                <p className="text-sm font-semibold text-gray-900">Facebook Page</p>
+                <p className="text-sm font-semibold text-gray-900">{t('post.team.fb_page', locale)}</p>
                 <p className="text-xs text-gray-500 truncate">swakmonmm</p>
               </div>
             </a>
@@ -160,16 +167,16 @@ export default async function PostAdPage() {
           {/* Info box */}
           <div className="mt-4 flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
             <i className="ti ti-clock text-base" aria-hidden="true" />
-            Typical reply: within a few hours
+            {t('post.team.reply_time', locale)}
           </div>
         </div>
 
         {/* RIGHT – What to include */}
         <div>
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">What to include</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('post.checklist.title', locale)}</h2>
           <div className="rounded-xl border border-gray-200 bg-white p-5">
             <ul className="space-y-3">
-              {CHECKLIST.map((item) => (
+              {checklistItems.map((item) => (
                 <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700">
                   <i className="ti ti-check mt-0.5 text-base text-green-600 flex-shrink-0" aria-hidden="true" />
                   {item}
@@ -182,7 +189,7 @@ export default async function PostAdPage() {
 
       {/* 4. LISTING TYPE SECTION */}
       <section className="mt-14">
-        <h2 className="mb-5 text-lg font-semibold text-gray-900">Choose your listing type</h2>
+        <h2 className="mb-5 text-lg font-semibold text-gray-900">{t('post.tiers.title', locale)}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {activeTiers.map((tier) => {
             const isFeatured = tier.tier === 'FEATURED'
@@ -196,15 +203,15 @@ export default async function PostAdPage() {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold text-gray-900">{tier.label}</p>
-                  {isFeatured && <Badge variant="featured">Popular</Badge>}
+                  <p className="font-semibold text-gray-900">{translateName(tier.label, locale)}</p>
+                  {isFeatured && <Badge variant="featured">{t('post.tiers.popular', locale)}</Badge>}
                 </div>
-                <p className="mt-1 text-lg font-bold text-brand-green">{formatPrice(tier)}</p>
+                <p className="mt-1 text-lg font-bold text-brand-green">{formatPrice(tier, locale)}</p>
                 <ul className="mt-3 space-y-1.5">
                   {(TIER_FEATURES[tier.tier] ?? []).map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
                       <i className="ti ti-check text-green-500" aria-hidden="true" />
-                      {f}
+                      {translateName(f, locale)}
                     </li>
                   ))}
                 </ul>
